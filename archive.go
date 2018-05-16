@@ -108,7 +108,7 @@ func OpenArchive(filename string, file *os.File) (ArchiveReader, error) {
 }
 
 // InvestigateArchive looks into an existing archive.
-func InvestigateArchive(filename string) (binaryNames [2]string, archiveType, md5String string, err error) {
+func InvestigateArchive(filename, binaryName string) (binaryNames [2]string, archiveType, md5String string, err error) {
 	log.Println("Investigating archive", filename)
 	file, err := os.Open(filename)
 	if err != nil {
@@ -125,7 +125,7 @@ func InvestigateArchive(filename string) (binaryNames [2]string, archiveType, md
 	files := archive.TopFiles()
 	for _, f := range files {
 		delimIndex := strings.LastIndex(f, "/")
-		if delimIndex > 0 && len(f) > delimIndex+4 && f[delimIndex+1:delimIndex+5] == "geth" {
+		if delimIndex > 0 && len(f) > delimIndex+4 && f[delimIndex+1:delimIndex+5] == binaryName {
 			binaryNames[0] = f[delimIndex+1:]
 			binaryNames[1] = f
 			break

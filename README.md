@@ -16,7 +16,7 @@ make geth-linux-386 geth-windows-386 geth-linux-amd64 geth-windows-amd64 geth-da
 Then run the script:
 
 ```
-go run *.go -url https://example.com -path ~/path_to_go-ethereum/
+go run *.go -url https://example.com -path ~/path_to_go-ethereum/ -version 1.0 -binary geth
 ```
 
 `clientBinaries.json` will be saved in current directory. Upload that json and geth archives to your website and configure Mist.

@@ -53,8 +53,10 @@ type mistConfig struct {
 
 func doMist(cmdline []string) {
 	var (
-		URL  = flag.String("url", "", `Destination from where to download binaries`)
-		path = flag.String("path", "./", `Path to archives with binaries`)
+		URL        = flag.String("url", "", `Destination from where to download binaries`)
+		path       = flag.String("path", "./", `Path to archives with binaries`)
+		version    = flag.String("version", "1.0", `Version of binaries`)
+		binaryName = flag.String("binary", "geth", `Base name for binary, e.g. geth`)
 	)
 	flag.CommandLine.Parse(cmdline)
 
@@ -64,17 +66,17 @@ func doMist(cmdline []string) {
 	}
 
 	var config mistConfig
-	config.Clients.Geth.Version = VERSION()
+	config.Clients.Geth.Version = *version
 
 	for _, file := range files {
 		fn := file.Name()
 		if strings.HasSuffix(fn, ".zip") || strings.HasSuffix(fn, ".tar.gz") {
-			archiveMeta, err := extractArchiveMeta(*path, fn, *URL)
+			archiveMeta, err := extractArchiveMeta(*path, fn, *URL, *binaryName)
 			if err != nil {
 				log.Printf("Skipping file %s, reason: %s\n", fn, err.Error())
 				continue
 			}
-			archiveMeta.fillInCommands()
+			archiveMeta.fillInCommands(*version, *binaryName)
 			if strings.Contains(fn, "linux") {
 				if strings.Contains(fn, "amd64") {
 					config.Clients.Geth.Platforms.Linux.X64 = archiveMeta
@@ -105,8 +107,8 @@ func doMist(cmdline []string) {
 	fmt.Println(config)
 }
 
-func extractArchiveMeta(path, fn, URL string) (meta gethArchiveMeta, err error) {
-	binaryNames, archiveType, md5, err := InvestigateArchive(path + fn)
+func extractArchiveMeta(path, fn, URL, binaryName string) (meta gethArchiveMeta, err error) {
+	binaryNames, archiveType, md5, err := InvestigateArchive(path+fn, binaryName)
 	if err != nil {
 		return
 	}
@@ -118,7 +120,7 @@ func extractArchiveMeta(path, fn, URL string) (meta gethArchiveMeta, err error) 
 	return
 }
 
-func (meta *gethArchiveMeta) fillInCommands() {
+func (meta *gethArchiveMeta) fillInCommands(version, binaryName string) {
 	meta.Commands.Sanity.Args = []string{"version"}
-	meta.Commands.Sanity.Output = []string{"Geth", VERSION()}
+	meta.Commands.Sanity.Output = []string{binaryName, version}
 }
